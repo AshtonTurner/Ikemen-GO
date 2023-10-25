@@ -4101,6 +4101,7 @@ function start.f_dialogueInit()
 		activeSide = -1,
 		endtime = -1,
 		wait = 0,
+		noskip=0,
 		checktoken = 0,
 		counter = 0,
 	}
@@ -4262,6 +4263,10 @@ function start.f_dialogueTokens(key, t)
 			t.wait = v.value[1] or 0
 			t.checktoken = key
 			break
+		elseif v.param == 'noskip' then
+			t.noskip = v.value[1] or 0
+			t.checktoken = key
+			break
 		elseif v.pn ~= -1 or v.param == 'name' then
 			--change portrait
 			if v.param == 'face' then
@@ -4384,7 +4389,7 @@ function start.f_dialogue()
 			animDraw(motif.dialogue_info['p' .. side .. '_active_data'])
 		end
 	end
-	if main.f_input(main.t_players, main.f_extractKeys(motif.dialogue_info.skip_key)) then
+	if main.f_input(main.t_players, main.f_extractKeys(motif.dialogue_info.skip_key)) and t.noskip==0 then
 		charSndStop()
 		t.parsed[t.textNum].cnt = 9999
 		t.parsed[t.textNum].tokens = {}
@@ -4406,11 +4411,12 @@ function start.f_dialogue()
 		end
 	end
 	local key_cancel = main.f_input(main.t_players, main.f_extractKeys(motif.dialogue_info.cancel_key))
-	if (t.endtime ~= -1 and t.counter > t.endtime) or (t.counter > motif.dialogue_info.skiptime and key_cancel) then
+	if (t.endtime ~= -1 and t.counter > t.endtime) or (t.counter > motif.dialogue_info.skiptime and key_cancel) and t.noskip==0 then
 		if key_cancel then
 			charSndStop()
 		end
 		dialogueReset()
+		t.noskip=0
 		start.dialogueInit = false
 		t.active = false
 		return false
